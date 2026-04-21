@@ -262,6 +262,3 @@ Regle d or:
 - Un projet = un dossier VPS = un vhost Nginx = un workflow GitHub Actions.
 
 
-
-<!-- test-auto-push -->
-

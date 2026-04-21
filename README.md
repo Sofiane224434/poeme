@@ -5,7 +5,7 @@
 [![Express](https://img.shields.io/badge/Express-5-lightgrey)](https://expressjs.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Starter kit moderne pour développer rapidement des applications web fullstack avec authentification JWT, i18n FR/EN, email transactionnel via Brevo, et traduction automatique DeepL.
+Starter kit moderne pour développer rapidement des applications web fullstack avec authentification JWT, i18n FR/EN, email transactionnel via Brevo, et traduction automatique DeepL. Le branding frontend est personnalise pour Azim404 (footer + lien externe).
 
 ## 📑 Table des Matières
 
@@ -45,8 +45,12 @@ cp backend/.env.example backend/.env
 # Initialiser la base de données (PowerShell)
 Get-Content backend/schema.sql | mysql -u root
 
-# Lancer tout en une commande
+# Lancer backend + frontend + watch DeepL
 npm run dev
+
+# Variante sans DeepL (si DEEPL_API_KEY absente/invalide)
+npm run dev:backend
+npm run dev:frontend
 ```
 
 - **Backend** : http://localhost:5000
@@ -60,11 +64,10 @@ npm run dev
 - ✅ Hashage sécurisé des mots de passe avec bcrypt
 - ✅ Validation partagée frontend/backend avec **Zod**
 - ✅ Architecture MVC backend (ES Modules)
-- ✅ Context API React + hooks personnalisés
-- ✅ Routing avec layouts (public / protégé via `PrivateRoute`)
+- ✅ Routing React avec layout principal `MainLayout`
 - ✅ **Internationalisation (i18n)** FR/EN avec i18next + chargement HTTP
 - ✅ **Traduction automatique** FR → EN via DeepL (incrémentale + mode watch)
-- ✅ **Email transactionnel** via Brevo (formulaire intégré, route protégée)
+- ✅ **Email transactionnel** via Brevo (API backend)
 - ✅ Tailwind CSS v4
 
 ---
@@ -149,6 +152,7 @@ starter-kit/
 │   │   ├── pages/
 │   │   └── services/
 │   └── vite.config.js
+├── GUIDE_VITEST.md
 ├── package-lock.json
 ├── package.json
 ├── README.md
@@ -214,23 +218,18 @@ DEEPL_API_KEY=votre-cle:fx
 
 ```
 frontend/src/
+├── App.jsx
 ├── components/
-│   ├── EmailComposer.jsx       # Formulaire d'envoi d'email
-│   ├── Header.jsx              # Navigation + sélecteur FR/EN
-│   ├── Footer.jsx
-│   └── PrivateRoute.jsx
-├── contexts/AuthContext.jsx    # État d'authentification global
-├── hooks/useAuth.js
+│   ├── Header.jsx              # Header simplifie + selecteur FR/EN
+│   └── Footer.jsx              # Footer avec lien Azim404.com
 ├── layouts/
-│   ├── AuthLayout.jsx          # Layout login/register
 │   └── MainLayout.jsx          # Layout principal
+├── layouts/AuthLayout.jsx
 ├── pages/
-│   ├── Home.jsx
-│   ├── Login.jsx
-│   ├── Register.jsx
-│   ├── Dashboard.jsx
-│   └── EmailPage.jsx           # Page d'envoi d'email (protégée)
-└── services/api.js             # Client HTTP (fetch + JWT auto-injecté)
+│   └── Home.jsx
+├── services/api.js             # Client HTTP (fetch)
+├── i18n.js
+└── main.jsx
 ```
 
 Fichiers de traduction : `frontend/public/locales/{fr,en}/translation.json`
@@ -260,7 +259,7 @@ Les traductions sont chargées depuis `public/locales/` via HTTP. La langue est 
 
 ## 📧 Email Transactionnel (Brevo)
 
-La page `/email` (protégée) permet d'envoyer un email via Brevo.
+L'endpoint backend `/api/email/send` permet d'envoyer un email transactionnel via Brevo.
 
 ### Réutiliser `sendCustomEmail`
 
@@ -310,20 +309,15 @@ await sendCustomEmail({
 
 ## 🛠️ Scripts Disponibles
 
-<!-- AUTO:scripts -->
 ### Racine
 
 | Commande | Rôle |
 |----------|------|
-| `npm run prepare` | `node -e "try{require('child_process').execSync('git config c…` |
-| `npm run dev` | `concurrently "npm run dev:backend" "npm run dev:frontend" "n…` |
+| `npm run dev` | `concurrently "npm run dev:backend" "npm run dev:frontend" "npm run translate:watch"` |
 | `npm run dev:backend` | `cd backend && npm run dev` |
 | `npm run dev:frontend` | `cd frontend && npm run dev` |
 | `npm run translate` | `node scripts/translate.js` |
 | `npm run translate:watch` | `node scripts/translate.js --watch` |
-| `npm run readme` | `node scripts/readme.js` |
-| `npm run readme:check` | `node scripts/readme.js --check` |
-| `npm run readme:watch` | `node scripts/readme.js --watch` |
 
 ### Backend (`cd backend`)
 
@@ -340,7 +334,6 @@ await sendCustomEmail({
 | `npm run build` | `vite build` |
 | `npm run lint` | `eslint .` |
 | `npm run preview` | `vite preview` |
-<!-- /AUTO:scripts -->
 
 ---
 
