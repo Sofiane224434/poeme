@@ -9,13 +9,14 @@ function Home() {
     const [poems, setPoems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [apiLoaded, setApiLoaded] = useState(false);
     const [commentsByPoem, setCommentsByPoem] = useState({});
     const [commentInputs, setCommentInputs] = useState({});
 
     const fallbackPoems = t('poems.items', { returnObjects: true });
 
     const displayedPoems = useMemo(() => {
-        if (poems.length) {
+        if (poems.length || apiLoaded) {
             return poems;
         }
 
@@ -36,6 +37,7 @@ function Home() {
             try {
                 const data = await poemService.list();
                 setPoems(data.poems || []);
+                setApiLoaded(true);
             } catch (err) {
                 setError(err.message || 'Impossible de charger les poemes');
             } finally {
@@ -118,6 +120,34 @@ function Home() {
         }
     };
 
+    const deletePoem = async (poemId) => {
+        if (user?.role !== 'admin') {
+            return;
+        }
+
+        const confirmed = window.confirm('Supprimer ce poeme ?');
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await poemService.remove(poemId);
+            setPoems((prev) => prev.filter((poem) => poem.id !== poemId));
+            setCommentsByPoem((prev) => {
+                const next = { ...prev };
+                delete next[poemId];
+                return next;
+            });
+            setCommentInputs((prev) => {
+                const next = { ...prev };
+                delete next[poemId];
+                return next;
+            });
+        } catch (err) {
+            alert(err.message || 'Suppression impossible');
+        }
+    };
+
     return (
         <div className="text-stone-100">
             <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(251,191,36,0.14),transparent_32%),radial-gradient(circle_at_80%_15%,rgba(244,63,94,0.14),transparent_28%),linear-gradient(120deg,#110f19_0%,#1f1730_45%,#2d1831_100%)]" />
@@ -137,6 +167,11 @@ function Home() {
                 <h2 className="mb-4 text-3xl md:text-4xl">{t('home.featured')}</h2>
                 {loading && <p className="text-amber-100/70">Chargement des poemes...</p>}
                 {error && <p className="mb-4 text-sm text-rose-300">{error}</p>}
+                {!loading && !error && apiLoaded && displayedPoems.length === 0 && (
+                    <p className="mb-4 text-sm text-amber-100/75">
+                        Aucun poeme publie pour le moment. Utilise le dashboard auteur pour publier le premier.
+                    </p>
+                )}
 
                 <div className="grid gap-5">
                     {displayedPoems.map((poem, poemIndex) => {
@@ -176,6 +211,15 @@ function Home() {
                                     >
                                         Commentaires ({poem.commentsCount || 0})
                                     </button>
+                                    {user?.role === 'admin' && !String(poem.id).startsWith('fallback-') && (
+                                        <button
+                                            type="button"
+                                            onClick={() => deletePoem(poem.id)}
+                                            className="rounded-full border border-rose-300/60 px-3 py-1.5 text-rose-200 transition hover:bg-rose-900/40"
+                                        >
+                                            Supprimer
+                                        </button>
+                                    )}
                                 </div>
 
                                 {comments && (

@@ -56,6 +56,9 @@ export const poemService = {
 		method: 'POST',
 		body: JSON.stringify(payload)
 	}),
+	remove: (poemId) => fetchAPI(`/poems/${poemId}`, {
+		method: 'DELETE'
+	}),
 	getComments: (poemId) => fetchAPI(`/poems/${poemId}/comments`),
 	addComment: (poemId, content) => fetchAPI(`/poems/${poemId}/comments`, {
 		method: 'POST',

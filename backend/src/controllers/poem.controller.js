@@ -185,3 +185,24 @@ export const toggleLike = async (req, res) => {
         res.status(500).json({ error: 'Impossible de gerer le like' });
     }
 };
+
+export const deletePoem = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Acces admin requis' });
+        }
+
+        const poemId = Number(req.params.id);
+
+        const poem = await query('SELECT id FROM poems WHERE id = ?', [poemId]);
+        if (!poem.length) {
+            return res.status(404).json({ error: 'Poeme introuvable' });
+        }
+
+        await query('DELETE FROM poems WHERE id = ?', [poemId]);
+
+        return res.json({ message: 'Poeme supprime' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Impossible de supprimer le poeme' });
+    }
+};
