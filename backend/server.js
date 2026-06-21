@@ -1,12 +1,16 @@
 // server.js
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { testConnection } from './src/config/db.js';
-import authRoutes from './src/routes/auth.routes.js';
-import emailRoutes from './src/routes/email.routes.js';
-import poemRoutes from './src/routes/poem.routes.js';
-import adminRoutes from './src/routes/admin.routes.js';
+
+dotenv.config({ override: true });
+
+const { testConnection } = await import('./src/config/db.js');
+const { default: authRoutes } = await import('./src/routes/auth.routes.js');
+const { default: emailRoutes } = await import('./src/routes/email.routes.js');
+const { default: poemRoutes } = await import('./src/routes/poem.routes.js');
+const { default: adminRoutes } = await import('./src/routes/admin.routes.js');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Connexion BDD
